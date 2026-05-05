@@ -1,9 +1,16 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ClientDashboardLive } from "@/components/request-live";
+import { ArrowLeft } from "lucide-react";
+import { ClientRequestDetailLive } from "@/components/request-live";
 import { SiteHeader } from "@/components/site-header";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-export default async function DashboardPage() {
+type PageProps = {
+  params: Promise<{ id: string }>;
+};
+
+export default async function ClientRequestDetailPage({ params }: PageProps) {
+  const { id } = await params;
   let shouldRedirect = false;
 
   try {
@@ -20,14 +27,21 @@ export default async function DashboardPage() {
   }
 
   if (shouldRedirect) {
-    redirect("/auth?next=/dashboard");
+    redirect(`/auth?next=/dashboard/requests/${id}`);
   }
 
   return (
     <main className="min-h-screen bg-paper">
       <SiteHeader />
       <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
-        <ClientDashboardLive />
+        <Link
+          className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-muted hover:text-ink"
+          href="/dashboard"
+        >
+          <ArrowLeft size={17} />
+          Dashboard
+        </Link>
+        <ClientRequestDetailLive id={id} />
       </div>
     </main>
   );

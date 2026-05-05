@@ -97,6 +97,7 @@ create table public.offers (
   price numeric(12,2) not null,
   currency text not null default 'IDR',
   estimated_days int,
+  estimated_unit text not null default 'hari',
   scope text not null,
   revision_count int not null default 1,
   payment_terms text,

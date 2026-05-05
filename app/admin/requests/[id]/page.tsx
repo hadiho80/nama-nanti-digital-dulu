@@ -1,9 +1,16 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import { AdminDashboardLive } from "@/components/request-live";
+import { ArrowLeft } from "lucide-react";
+import { AdminRequestDetailLive } from "@/components/request-live";
 import { SiteHeader } from "@/components/site-header";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-export default async function AdminPage() {
+type PageProps = {
+  params: Promise<{ id: string }>;
+};
+
+export default async function AdminRequestDetailPage({ params }: PageProps) {
+  const { id } = await params;
   let target: string | null = null;
 
   try {
@@ -13,7 +20,7 @@ export default async function AdminPage() {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      target = "/auth?next=/admin";
+      target = `/auth?next=/admin/requests/${id}`;
     }
 
     if (user) {
@@ -39,7 +46,14 @@ export default async function AdminPage() {
     <main className="min-h-screen bg-paper">
       <SiteHeader />
       <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
-        <AdminDashboardLive />
+        <Link
+          className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-muted hover:text-ink"
+          href="/admin"
+        >
+          <ArrowLeft size={17} />
+          Admin
+        </Link>
+        <AdminRequestDetailLive id={id} />
       </div>
     </main>
   );

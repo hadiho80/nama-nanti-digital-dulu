@@ -3,7 +3,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { FileUp, Send } from "lucide-react";
 import { services } from "@/lib/data";
-import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 const budgetRanges = [
   "< Rp500rb",
@@ -80,13 +79,23 @@ export function RequestForm() {
     setMessage("");
 
     try {
-      const supabase = createSupabaseBrowserClient();
-      const {
-        data: { user },
-        error: userError
-      } = await supabase.auth.getUser();
+      const payload = new FormData();
+      Object.entries(form).forEach(([key, value]) => {
+        payload.set(key, value);
+      });
 
-      if (userError || !user) {
+      if (files?.length) {
+        Array.from(files).forEach((file) => {
+          payload.append("files", file);
+        });
+      }
+
+      const response = await fetch("/api/client/requests", {
+        method: "POST",
+        body: payload
+      });
+
+      if (response.status === 401) {
         window.localStorage.setItem(
           "pending-request",
           JSON.stringify({ ...form, savedAt: new Date().toISOString() })
@@ -95,70 +104,18 @@ export function RequestForm() {
         return;
       }
 
-      const { data: categories, error: categoryError } = await supabase
-        .from("service_categories")
-        .select("id, slug")
-        .eq("slug", form.categorySlug)
-        .maybeSingle();
+      const result = (await response.json()) as {
+        requestId?: string;
+        error?: string;
+      };
 
-      if (categoryError) {
-        setMessage(categoryError.message);
+      if (!response.ok || !result.requestId) {
+        setMessage(result.error ?? "Request gagal dibuat.");
         return;
-      }
-
-      const { data: request, error: requestError } = await supabase
-        .from("requests")
-        .insert({
-          client_id: user.id,
-          category_id: categories?.id ?? null,
-          title: form.title,
-          description: form.description,
-          detail_type: form.detailType || null,
-          budget_range: form.budgetRange || null,
-          budget_amount: form.budgetAmount ? Number(form.budgetAmount) : null,
-          expected_deadline: form.expectedDeadline || null,
-          contact_name: form.contactName,
-          contact_email: form.contactEmail,
-          contact_phone: form.contactPhone,
-          source: "website"
-        })
-        .select("id")
-        .single();
-
-      if (requestError || !request) {
-        setMessage(requestError?.message ?? "Request gagal dibuat.");
-        return;
-      }
-
-      if (files?.length) {
-        for (const file of Array.from(files)) {
-          const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
-          const path = `${user.id}/${request.id}/${Date.now()}-${safeName}`;
-          const { error: uploadError } = await supabase.storage
-            .from("request-files")
-            .upload(path, file, { upsert: false });
-
-          if (uploadError) {
-            setMessage(
-              `Request dibuat, tapi upload ${file.name} gagal: ${uploadError.message}`
-            );
-            continue;
-          }
-
-          await supabase.from("request_files").insert({
-            request_id: request.id,
-            uploaded_by: user.id,
-            bucket: "request-files",
-            path,
-            file_name: file.name,
-            mime_type: file.type,
-            file_size: file.size
-          });
-        }
       }
 
       window.localStorage.removeItem("pending-request");
-      window.location.href = "/dashboard";
+      window.location.href = `/dashboard/requests/${result.requestId}`;
     } catch {
       window.localStorage.setItem(
         "pending-request",
