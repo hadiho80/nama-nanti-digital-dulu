@@ -16,35 +16,35 @@ export default function HomePage() {
       <SiteHeader />
 
       <section className="border-b border-line">
-        <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:py-20">
+        <div className="mx-auto grid w-full max-w-6xl gap-7 px-4 py-8 sm:px-6 sm:py-16 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:py-20">
           <div>
-            <p className="mb-4 inline-flex rounded-full border border-line bg-white px-3 py-1 text-sm font-medium text-muted">
+            <p className="mb-3 inline-flex rounded-full border border-line bg-white px-3 py-1 text-xs font-medium text-muted sm:mb-4 sm:text-sm">
               Working brand: Nama Nanti, Digital Dulu
             </p>
-            <h1 className="max-w-3xl text-4xl font-semibold leading-tight tracking-normal text-ink sm:text-5xl lg:text-6xl">
+            <h1 className="max-w-3xl text-3xl font-semibold leading-tight tracking-normal text-ink sm:text-5xl lg:text-6xl">
               Request kerja digital, nanti kami bantu beresin.
             </h1>
-            <p className="mt-5 max-w-2xl text-base leading-8 text-muted sm:text-lg">
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-muted sm:mt-5 sm:text-lg sm:leading-8">
               Web, aplikasi kecil, Excel, Word, PowerPoint, automation, sampai
               dashboard sederhana. Ceritakan kebutuhanmu, tulis budget awal,
               lalu pantau progress dari dashboard.
             </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-6 flex flex-col gap-2 sm:mt-8 sm:flex-row sm:gap-3">
               <Link
-                className="focus-ring inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-ink px-5 text-sm font-semibold text-white transition hover:bg-black"
+                className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-ink px-5 text-sm font-semibold text-white transition hover:bg-black sm:h-12"
                 href="/request"
               >
                 Kirim Request
                 <ArrowRight size={18} />
               </Link>
               <Link
-                className="focus-ring inline-flex h-12 items-center justify-center rounded-lg border border-line bg-white px-5 text-sm font-semibold text-ink transition hover:border-ink"
+                className="focus-ring inline-flex h-11 items-center justify-center rounded-lg border border-line bg-white px-5 text-sm font-semibold text-ink transition hover:border-ink sm:h-12"
                 href="#contoh"
               >
                 Lihat Contoh
               </Link>
             </div>
-            <div className="mt-8 grid gap-3 text-sm text-muted sm:grid-cols-3">
+            <div className="mt-5 grid gap-2 text-sm text-muted sm:mt-8 sm:grid-cols-3 sm:gap-3">
               {["Budget bisa nego", "File bisa upload", "Cocok dari HP"].map(
                 (item) => (
                   <div className="flex items-center gap-2" key={item}>
@@ -56,14 +56,14 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="rounded-[8px] border border-line bg-white p-4 shadow-soft">
-            <div className="rounded-[8px] bg-[#eef7f4] p-4">
+          <div className="rounded-[8px] border border-line bg-white p-3 shadow-soft sm:p-4">
+            <div className="rounded-[8px] bg-[#eef7f4] p-3 sm:p-4">
               <div className="mb-4 flex items-center justify-between">
                 <div>
                   <p className="text-xs font-semibold uppercase text-mint">
                     Request masuk
                   </p>
-                  <h2 className="mt-1 text-lg font-semibold text-ink">
+                  <h2 className="mt-1 text-base font-semibold text-ink sm:text-lg">
                     Landing page katalog snack
                   </h2>
                 </div>
@@ -101,19 +101,19 @@ export default function HomePage() {
       </section>
 
       <section id="layanan" className="border-b border-line bg-white">
-        <div className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6">
+        <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
           <div className="max-w-2xl">
             <p className="text-sm font-semibold text-mint">Layanan</p>
-            <h2 className="mt-2 text-3xl font-semibold text-ink">
+            <h2 className="mt-2 text-2xl font-semibold text-ink sm:text-3xl">
               Kebutuhan kecil sampai MVP ringan bisa masuk dulu.
             </h2>
           </div>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-6 grid gap-3 sm:mt-8 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
             {services.map((service) => {
               const Icon = service.icon;
               return (
                 <article
-                  className="rounded-lg border border-line bg-paper p-5"
+                  className="rounded-lg border border-line bg-paper p-4 sm:p-5"
                   key={service.name}
                 >
                   <div className="grid h-11 w-11 place-items-center rounded-lg bg-white text-mint">
@@ -143,7 +143,7 @@ export default function HomePage() {
       </section>
 
       <section className="border-b border-line">
-        <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-14 sm:px-6 lg:grid-cols-3">
+        <div className="mx-auto grid w-full max-w-6xl gap-6 px-4 py-10 sm:px-6 sm:py-14 lg:grid-cols-3">
           {[
             {
               icon: MousePointerClick,
@@ -178,11 +178,11 @@ export default function HomePage() {
       </section>
 
       <section id="contoh" className="bg-white">
-        <div className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6">
+        <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
               <p className="text-sm font-semibold text-mint">Contoh dummy</p>
-              <h2 className="mt-2 text-3xl font-semibold text-ink">
+              <h2 className="mt-2 text-2xl font-semibold text-ink sm:text-3xl">
                 Contoh hasil yang bisa ditawarkan.
               </h2>
             </div>
@@ -191,7 +191,7 @@ export default function HomePage() {
               bisa diganti dengan case study client asli setelah ada izin.
             </p>
           </div>
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
+          <div className="mt-6 grid gap-3 sm:mt-8 sm:gap-4 md:grid-cols-3">
             {portfolioSamples.map((item) => {
               const Icon = item.icon;
               return (
@@ -221,7 +221,7 @@ export default function HomePage() {
       </section>
 
       <section className="border-t border-line bg-ink text-white">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10 sm:px-6 md:flex-row md:items-center md:justify-between">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 px-4 py-8 sm:px-6 sm:py-10 md:flex-row md:items-center md:justify-between">
           <div>
             <h2 className="text-2xl font-semibold">
               Punya request digital yang masih berantakan?

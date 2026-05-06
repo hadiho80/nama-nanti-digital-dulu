@@ -16,9 +16,7 @@ export function SiteHeader() {
             <span className="block text-xs text-muted">Digital Dulu</span>
           </span>
         </Link>
-        <nav className="hidden items-center gap-6 text-sm text-muted md:flex">
-          <AuthNav />
-        </nav>
+        <AuthNav />
       </div>
     </header>
   );

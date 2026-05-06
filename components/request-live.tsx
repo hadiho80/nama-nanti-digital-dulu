@@ -121,11 +121,11 @@ export function ClientDashboardLive() {
 
   return (
     <>
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
         <div>
           <p className="text-sm font-semibold text-mint">Dashboard client</p>
-          <h1 className="mt-2 text-3xl font-semibold text-ink">Request kamu</h1>
-          <p className="mt-2 inline-flex items-center gap-2 text-sm text-muted">
+          <h1 className="mt-1 text-2xl font-semibold text-ink sm:text-3xl">Request kamu</h1>
+          <p className="mt-1 inline-flex items-center gap-2 text-xs text-muted sm:text-sm">
             <RefreshCw size={15} />
             Auto refresh tiap 15 detik saat tab aktif
           </p>
@@ -139,15 +139,15 @@ export function ClientDashboardLive() {
         </Link>
       </div>
 
-      <section className="mt-8 grid gap-4 md:grid-cols-3">
+      <section className="mt-5 grid grid-cols-3 gap-2 sm:mt-8 sm:gap-4 md:grid-cols-3">
         {[
           ["Request aktif", activeCount],
           ["Menunggu aksi", waitingCount],
           ["Selesai", doneCount]
         ].map(([label, value]) => (
-          <div className="rounded-lg border border-line bg-white p-5" key={label}>
-            <p className="text-sm text-muted">{label}</p>
-            <p className="mt-2 text-3xl font-semibold text-ink">{value}</p>
+          <div className="rounded-lg border border-line bg-white p-3 sm:p-5" key={label}>
+            <p className="text-xs leading-4 text-muted sm:text-sm">{label}</p>
+            <p className="mt-1 text-2xl font-semibold text-ink sm:mt-2 sm:text-3xl">{value}</p>
           </div>
         ))}
       </section>
@@ -186,13 +186,13 @@ export function AdminDashboardLive() {
 
   return (
     <>
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
         <div>
           <p className="text-sm font-semibold text-mint">Admin solo</p>
-          <h1 className="mt-2 text-3xl font-semibold text-ink">
+          <h1 className="mt-1 text-2xl font-semibold text-ink sm:text-3xl">
             Kelola request masuk
           </h1>
-          <p className="mt-2 inline-flex items-center gap-2 text-sm text-muted">
+          <p className="mt-1 inline-flex items-center gap-2 text-xs text-muted sm:text-sm">
             <RefreshCw size={15} />
             List request auto refresh tiap 15 detik saat tab aktif
           </p>
@@ -206,7 +206,7 @@ export function AdminDashboardLive() {
         </Link>
       </div>
 
-      <section className="mt-8 grid gap-4 md:grid-cols-4">
+      <section className="mt-5 grid grid-cols-2 gap-2 sm:mt-8 sm:gap-4 md:grid-cols-4">
         {[
           ["Baru", requests.filter((item) => item.status === "submitted").length],
           ["Nego", requests.filter((item) => item.status === "negotiating").length],
@@ -216,9 +216,9 @@ export function AdminDashboardLive() {
             requests.filter((item) => item.status === "waiting_client").length
           ]
         ].map(([label, value]) => (
-          <div className="rounded-lg border border-line bg-white p-5" key={label}>
-            <p className="text-sm text-muted">{label}</p>
-            <p className="mt-2 text-3xl font-semibold text-ink">{value}</p>
+          <div className="rounded-lg border border-line bg-white p-3 sm:p-5" key={label}>
+            <p className="text-xs leading-4 text-muted sm:text-sm">{label}</p>
+            <p className="mt-1 text-2xl font-semibold text-ink sm:mt-2 sm:text-3xl">{value}</p>
           </div>
         ))}
       </section>
@@ -248,8 +248,8 @@ function RequestList({
   showClient: boolean;
 }) {
   return (
-    <section className="mt-6 rounded-lg border border-line bg-white">
-      <div className="border-b border-line p-4 sm:p-5">
+    <section className="mt-4 rounded-lg border border-line bg-white sm:mt-6">
+      <div className="border-b border-line p-3 sm:p-5">
         <h2 className="text-lg font-semibold text-ink">Daftar request</h2>
       </div>
       {error ? <p className="p-5 text-sm text-rose-700">{error}</p> : null}
@@ -260,7 +260,7 @@ function RequestList({
       <div className="divide-y divide-line">
         {requests.map((request) => (
           <article
-            className="grid gap-4 p-4 sm:p-5 lg:grid-cols-[1fr_auto] lg:items-center"
+            className="grid gap-3 p-3 sm:p-5 lg:grid-cols-[1fr_auto] lg:items-center"
             key={request.id}
           >
             <div>
@@ -275,10 +275,10 @@ function RequestList({
                   </span>
                 ) : null}
               </div>
-              <h3 className="mt-3 text-lg font-semibold text-ink">
+              <h3 className="mt-2 text-base font-semibold leading-6 text-ink sm:mt-3 sm:text-lg">
                 {request.title}
               </h3>
-              <div className="mt-3 flex flex-wrap gap-3 text-sm text-muted">
+              <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted sm:mt-3 sm:text-sm">
                 <span className="inline-flex items-center gap-1.5">
                   <FileText size={16} />
                   {categoryName(request)}
@@ -294,7 +294,7 @@ function RequestList({
               </div>
             </div>
             <Link
-              className="focus-ring inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-line px-4 text-sm font-semibold text-ink hover:border-ink"
+              className="focus-ring inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-line px-3 text-sm font-semibold text-ink hover:border-ink sm:h-10 sm:px-4"
               href={`${basePath}/${request.id}`}
             >
               Detail
@@ -318,6 +318,7 @@ export function AdminRequestDetailLive({ id }: { id: string }) {
 function RequestDetailLive({ id, mode }: { id: string; mode: "client" | "admin" }) {
   const [request, setRequest] = useState<AnyRequest | null>(null);
   const [error, setError] = useState("");
+  const [activeTab, setActiveTab] = useState(mode === "admin" ? "chat" : "info");
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState("");
   const [statusNote, setStatusNote] = useState("");
@@ -473,18 +474,52 @@ function RequestDetailLive({ id, mode }: { id: string; mode: "client" | "admin" 
   }
 
   const clientCanCancel = mode === "client" && canClientCancel(request.status);
+  const tabs =
+    mode === "admin"
+      ? [
+          ["info", "Info"],
+          ["chat", "Chat"],
+          ["offer", "Offer"],
+          ["status", "Status"],
+          ["file", "File"],
+          ["history", "History"]
+        ]
+      : [
+          ["info", "Info"],
+          ["chat", "Chat"],
+          ["offer", "Offer"],
+          ["file", "File"],
+          ["history", "History"]
+        ];
+  const tabPanel = (tab: string) =>
+    activeTab === tab ? "block" : "hidden lg:block";
 
   return (
-    <div className="grid gap-5 lg:grid-cols-[0.64fr_0.36fr]">
+    <>
+    <div className="sticky top-16 z-20 -mx-4 mb-4 flex gap-2 overflow-x-auto border-b border-line bg-paper px-4 py-2 lg:hidden">
+      {tabs.map(([value, label]) => (
+        <button
+          className={`h-9 shrink-0 rounded-lg px-3 text-sm font-semibold ${
+            activeTab === value ? "bg-ink text-white" : "border border-line bg-white text-muted"
+          }`}
+          key={value}
+          onClick={() => setActiveTab(value)}
+          type="button"
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+    <div className="grid gap-4 lg:grid-cols-[0.64fr_0.36fr] lg:gap-5">
       <section className="grid gap-5">
-        <article className="rounded-lg border border-line bg-white p-5 shadow-soft">
+        <article className={`${tabPanel("info")} rounded-lg border border-line bg-white p-4 shadow-soft sm:p-5`}>
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs font-semibold text-muted">{request.id.slice(0, 8)}</span>
             <StatusBadge label={statusLabel(request.status)} />
           </div>
-          <h1 className="mt-4 text-3xl font-semibold text-ink">{request.title}</h1>
+          <h1 className="mt-3 text-2xl font-semibold text-ink sm:mt-4 sm:text-3xl">{request.title}</h1>
           <p className="mt-3 text-sm leading-7 text-muted">{request.description}</p>
-          <div className="mt-5 grid gap-3 text-sm sm:grid-cols-3">
+          <div className="mt-4 grid gap-2 text-sm sm:mt-5 sm:grid-cols-3 sm:gap-3">
             <InfoBox label="Kategori" value={categoryName(request)} />
             <InfoBox label="Budget" value={request.budget_range || formatCurrency(request.budget_amount)} />
             <InfoBox label="Deadline" value={request.expected_deadline ?? "-"} />
@@ -496,7 +531,7 @@ function RequestDetailLive({ id, mode }: { id: string; mode: "client" | "admin" 
           ) : null}
         </article>
 
-        <article className="rounded-lg border border-line bg-white p-5">
+        <article className={`${tabPanel("chat")} rounded-lg border border-line bg-white p-4 sm:p-5`}>
           <h2 className="text-lg font-semibold text-ink">Thread</h2>
           <div className="mt-4 grid max-h-[460px] gap-3 overflow-y-auto pr-1">
             {messages.length === 0 ? (
@@ -529,8 +564,8 @@ function RequestDetailLive({ id, mode }: { id: string; mode: "client" | "admin" 
         </article>
       </section>
 
-      <aside className="grid gap-5">
-        <article className="rounded-lg border border-line bg-white p-5">
+      <aside className="grid gap-4 lg:gap-5">
+        <article className={`${tabPanel("offer")} rounded-lg border border-line bg-white p-4 sm:p-5`}>
           <h2 className="text-lg font-semibold text-ink">Penawaran</h2>
           {activeOffer ? (
             <>
@@ -561,7 +596,7 @@ function RequestDetailLive({ id, mode }: { id: string; mode: "client" | "admin" 
 
         {mode === "admin" ? (
           <>
-            <form className="rounded-lg border border-line bg-white p-5" onSubmit={updateStatus}>
+            <form className={`${tabPanel("status")} rounded-lg border border-line bg-white p-4 sm:p-5`} onSubmit={updateStatus}>
               <h2 className="text-lg font-semibold text-ink">Update status</h2>
               <select className="focus-ring mt-4 h-11 w-full rounded-lg border border-line px-3 text-sm" onChange={(event) => setStatus(event.target.value)} value={status}>
                 {requestStatusOptions.map((item) => (
@@ -575,7 +610,7 @@ function RequestDetailLive({ id, mode }: { id: string; mode: "client" | "admin" 
               </button>
             </form>
 
-            <form className="rounded-lg border border-line bg-white p-5" onSubmit={createOffer}>
+            <form className={`${tabPanel("offer")} rounded-lg border border-line bg-white p-4 sm:p-5`} onSubmit={createOffer}>
               <h2 className="text-lg font-semibold text-ink">Buat offer</h2>
               <div className="mt-4 grid gap-3">
                 <label className="grid gap-2 text-sm font-medium text-ink">
@@ -621,7 +656,7 @@ function RequestDetailLive({ id, mode }: { id: string; mode: "client" | "admin" 
             </form>
           </>
         ) : (
-          <article className="rounded-lg border border-line bg-white p-5">
+          <article className={`${tabPanel("offer")} rounded-lg border border-line bg-white p-4 sm:p-5`}>
             <h2 className="text-lg font-semibold text-ink">Pembatalan</h2>
             {clientCanCancel ? (
               <button className="focus-ring mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-rose-200 text-sm font-semibold text-rose-700" onClick={cancelRequest} type="button">
@@ -636,7 +671,7 @@ function RequestDetailLive({ id, mode }: { id: string; mode: "client" | "admin" 
           </article>
         )}
 
-        <article className="rounded-lg border border-line bg-white p-5">
+        <article className={`${tabPanel("file")} rounded-lg border border-line bg-white p-4 sm:p-5`}>
           <h2 className="text-lg font-semibold text-ink">File</h2>
           <div className="mt-4 grid gap-2">
             {(request.request_files ?? []).length === 0 ? <p className="text-sm text-muted">Belum ada file.</p> : null}
@@ -659,7 +694,7 @@ function RequestDetailLive({ id, mode }: { id: string; mode: "client" | "admin" 
           </div>
         </article>
 
-        <article className="rounded-lg border border-line bg-white p-5">
+        <article className={`${tabPanel("history")} rounded-lg border border-line bg-white p-4 sm:p-5`}>
           <h2 className="text-lg font-semibold text-ink">Riwayat status</h2>
           <div className="mt-4 grid gap-3">
             {histories.length === 0 ? <p className="text-sm text-muted">Belum ada riwayat.</p> : null}
@@ -681,6 +716,7 @@ function RequestDetailLive({ id, mode }: { id: string; mode: "client" | "admin" 
         {error ? <p className="rounded-lg bg-rose-50 p-3 text-sm text-rose-700">{error}</p> : null}
       </aside>
     </div>
+    </>
   );
 }
 
