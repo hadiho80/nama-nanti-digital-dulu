@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   CalendarDays,
+  ClipboardList,
   FileText,
   MessageCircle,
   Paperclip,
@@ -154,6 +155,8 @@ export function ClientDashboardLive() {
 
       <RequestList
         basePath="/dashboard/requests"
+        ctaHref="/request"
+        ctaLabel="Kirim Request Baru"
         error={error}
         isLoading={isLoading}
         requests={requests}
@@ -167,6 +170,8 @@ export function AdminDashboardLive() {
   const [requests, setRequests] = useState<AnyRequest[]>([]);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   async function load() {
     try {
@@ -183,6 +188,17 @@ export function AdminDashboardLive() {
   }
 
   useVisiblePolling(load, DASHBOARD_POLL_MS, []);
+  const filteredRequests = requests.filter((request) => {
+    const keyword = search.toLowerCase();
+    const matchesSearch =
+      !keyword ||
+      request.title?.toLowerCase().includes(keyword) ||
+      request.contact_name?.toLowerCase().includes(keyword) ||
+      request.contact_email?.toLowerCase().includes(keyword);
+    const matchesStatus = statusFilter === "all" || request.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
 
   return (
     <>
@@ -225,9 +241,34 @@ export function AdminDashboardLive() {
 
       <RequestList
         basePath="/admin/requests"
+        ctaHref="/request"
+        ctaLabel="Input Manual"
         error={error}
+        filters={
+          <div className="grid gap-2 sm:grid-cols-[1fr_220px]">
+            <input
+              className="focus-ring h-10 rounded-lg border border-line px-3 text-sm"
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Cari judul, nama, atau email client"
+              type="search"
+              value={search}
+            />
+            <select
+              className="focus-ring h-10 rounded-lg border border-line px-3 text-sm"
+              onChange={(event) => setStatusFilter(event.target.value)}
+              value={statusFilter}
+            >
+              <option value="all">Semua status</option>
+              {requestStatusOptions.map((status) => (
+                <option key={status} value={status}>
+                  {statusLabels[status]}
+                </option>
+              ))}
+            </select>
+          </div>
+        }
         isLoading={isLoading}
-        requests={requests}
+        requests={filteredRequests}
         showClient
       />
     </>
@@ -239,23 +280,30 @@ function RequestList({
   isLoading,
   error,
   basePath,
-  showClient
+  showClient,
+  filters,
+  ctaHref,
+  ctaLabel
 }: {
   requests: AnyRequest[];
   isLoading: boolean;
   error: string;
   basePath: string;
   showClient: boolean;
+  filters?: React.ReactNode;
+  ctaHref: string;
+  ctaLabel: string;
 }) {
   return (
     <section className="mt-4 rounded-lg border border-line bg-white sm:mt-6">
-      <div className="border-b border-line p-3 sm:p-5">
+      <div className="grid gap-3 border-b border-line p-3 sm:p-5">
         <h2 className="text-lg font-semibold text-ink">Daftar request</h2>
+        {filters}
       </div>
       {error ? <p className="p-5 text-sm text-rose-700">{error}</p> : null}
-      {isLoading ? <p className="p-5 text-sm text-muted">Memuat data...</p> : null}
+      {isLoading ? <RequestSkeleton /> : null}
       {!isLoading && requests.length === 0 ? (
-        <p className="p-5 text-sm text-muted">Belum ada request.</p>
+        <EmptyRequestState ctaHref={ctaHref} ctaLabel={ctaLabel} />
       ) : null}
       <div className="divide-y divide-line">
         {requests.map((request) => (
@@ -307,6 +355,51 @@ function RequestList({
   );
 }
 
+function RequestSkeleton() {
+  return (
+    <div className="divide-y divide-line">
+      {[0, 1, 2].map((item) => (
+        <div className="p-3 sm:p-5" key={item}>
+          <div className="h-4 w-28 rounded bg-line" />
+          <div className="mt-3 h-5 w-3/4 rounded bg-line" />
+          <div className="mt-3 flex gap-2">
+            <div className="h-4 w-20 rounded bg-line" />
+            <div className="h-4 w-24 rounded bg-line" />
+            <div className="h-4 w-16 rounded bg-line" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function EmptyRequestState({
+  ctaHref,
+  ctaLabel
+}: {
+  ctaHref: string;
+  ctaLabel: string;
+}) {
+  return (
+    <div className="grid place-items-center p-8 text-center">
+      <div className="grid h-12 w-12 place-items-center rounded-lg bg-mint/10 text-mint">
+        <ClipboardList size={24} />
+      </div>
+      <h3 className="mt-4 text-lg font-semibold text-ink">Belum ada request</h3>
+      <p className="mt-2 max-w-sm text-sm leading-6 text-muted">
+        Request yang masuk akan tampil di sini lengkap dengan status, chat,
+        file, dan penawaran.
+      </p>
+      <Link
+        className="focus-ring mt-4 inline-flex h-10 items-center justify-center rounded-lg bg-ink px-4 text-sm font-semibold text-white"
+        href={ctaHref}
+      >
+        {ctaLabel}
+      </Link>
+    </div>
+  );
+}
+
 export function ClientRequestDetailLive({ id }: { id: string }) {
   return <RequestDetailLive id={id} mode="client" />;
 }
@@ -318,6 +411,7 @@ export function AdminRequestDetailLive({ id }: { id: string }) {
 function RequestDetailLive({ id, mode }: { id: string; mode: "client" | "admin" }) {
   const [request, setRequest] = useState<AnyRequest | null>(null);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [activeTab, setActiveTab] = useState(mode === "admin" ? "chat" : "info");
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState("");
@@ -380,6 +474,7 @@ function RequestDetailLive({ id, mode }: { id: string; mode: "client" | "admin" 
       }
     );
     setMessage("");
+    setNotice("Pesan terkirim.");
     await load();
   }
 
@@ -393,6 +488,7 @@ function RequestDetailLive({ id, mode }: { id: string; mode: "client" | "admin" 
       body: data
     });
     setFiles(null);
+    setNotice("File berhasil diupload.");
     await load();
   }
 
@@ -401,6 +497,7 @@ function RequestDetailLive({ id, mode }: { id: string; mode: "client" | "admin" 
     await fetchJson(`/api/client/offers/${activeOffer.id}/accept`, {
       method: "POST"
     });
+    setNotice("Offer disetujui. Menunggu instruksi pembayaran manual.");
     await load();
   }
 
@@ -409,6 +506,7 @@ function RequestDetailLive({ id, mode }: { id: string; mode: "client" | "admin" 
     if (!ok) return;
     try {
       await fetchJson(`/api/client/requests/${id}/cancel`, { method: "POST" });
+      setNotice("Request berhasil dibatalkan.");
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Request tidak bisa dibatalkan.");
@@ -423,6 +521,7 @@ function RequestDetailLive({ id, mode }: { id: string; mode: "client" | "admin" 
       body: JSON.stringify({ status, note: statusNote })
     });
     setStatusNote("");
+    setNotice("Status berhasil diperbarui.");
     await load();
   }
 
@@ -459,6 +558,7 @@ function RequestDetailLive({ id, mode }: { id: string; mode: "client" | "admin" 
         scope: "",
         paymentTerms: ""
       });
+      setNotice("Offer berhasil dikirim ke client.");
       await load();
     } catch (err) {
       setOfferError(err instanceof Error ? err.message : "Offer gagal dikirim.");
@@ -511,6 +611,11 @@ function RequestDetailLive({ id, mode }: { id: string; mode: "client" | "admin" 
       ))}
     </div>
     <div className="grid gap-4 lg:grid-cols-[0.64fr_0.36fr] lg:gap-5">
+      {notice ? (
+        <div className="lg:col-span-2 rounded-lg bg-mint/10 p-3 text-sm font-medium text-emerald-700">
+          {notice}
+        </div>
+      ) : null}
       <section className="grid gap-5">
         <article className={`${tabPanel("info")} rounded-lg border border-line bg-white p-4 shadow-soft sm:p-5`}>
           <div className="flex flex-wrap items-center gap-2">

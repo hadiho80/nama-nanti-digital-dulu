@@ -220,6 +220,22 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="border-t border-line bg-paper">
+        <div className="mx-auto grid w-full max-w-6xl gap-3 px-4 py-8 sm:grid-cols-4 sm:px-6 sm:py-10">
+          {[
+            ["Untuk UMKM", "Cocok untuk kebutuhan kecil yang harus cepat rapi."],
+            ["Untuk Mahasiswa", "Bantu dokumen, presentasi, data, dan tools ringan."],
+            ["Budget Nego", "Client bisa tulis budget awal dan diskusi scope."],
+            ["Progress Jelas", "Status, chat, file, dan offer tersimpan di dashboard."]
+          ].map(([title, body]) => (
+            <article className="rounded-lg border border-line bg-white p-4" key={title}>
+              <h3 className="text-sm font-semibold text-ink">{title}</h3>
+              <p className="mt-2 text-sm leading-6 text-muted">{body}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <section className="border-t border-line bg-ink text-white">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 px-4 py-8 sm:px-6 sm:py-10 md:flex-row md:items-center md:justify-between">
           <div>
@@ -240,6 +256,21 @@ export default function HomePage() {
           </Link>
         </div>
       </section>
+
+      <footer className="border-t border-line bg-white">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-6 text-sm text-muted sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <p className="font-semibold text-ink">Nama Nanti, Digital Dulu</p>
+          <div className="flex flex-wrap gap-4">
+            <Link className="hover:text-ink" href="/auth">
+              Cek Progress
+            </Link>
+            <Link className="hover:text-ink" href="/request">
+              Kirim Request
+            </Link>
+            <span>Instagram: segera</span>
+          </div>
+        </div>
+      </footer>
     </main>
   );
 }

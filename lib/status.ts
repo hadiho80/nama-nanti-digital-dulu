@@ -30,6 +30,21 @@ export const statusLabels: Record<RequestStatus, string> = {
   cancelled: "Dibatalkan"
 };
 
+export const statusColors: Record<RequestStatus, string> = {
+  submitted: "bg-ocean/10 text-ocean",
+  reviewing: "bg-sun/20 text-amber-800",
+  negotiating: "bg-blush/10 text-rose-700",
+  waiting_approval: "bg-purple-100 text-purple-700",
+  approved: "bg-cyan-100 text-cyan-800",
+  waiting_payment: "bg-amber-100 text-amber-800",
+  working: "bg-mint/10 text-emerald-700",
+  waiting_client: "bg-orange-100 text-orange-800",
+  revision: "bg-indigo-100 text-indigo-700",
+  waiting_final_payment: "bg-yellow-100 text-yellow-800",
+  done: "bg-ink text-white",
+  cancelled: "bg-line text-muted"
+};
+
 export const cancelableByClient: RequestStatus[] = [
   "submitted",
   "reviewing",
