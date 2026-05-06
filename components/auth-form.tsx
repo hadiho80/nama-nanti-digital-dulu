@@ -1,7 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { Mail } from "lucide-react";
+import { Toast, type ToastTone } from "@/components/toast";
+import { translateAuthError } from "@/lib/auth-errors";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type AuthMode = "signin" | "signup";
@@ -13,6 +16,7 @@ export function AuthForm() {
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
+  const [toastTone, setToastTone] = useState<ToastTone>("info");
   const [isLoading, setIsLoading] = useState(false);
 
   function getNextPath() {
@@ -49,10 +53,12 @@ export function AuthForm() {
         });
 
         if (error) {
-          setMessage(error.message);
+          setToastTone("error");
+          setMessage(translateAuthError(error.message));
           return;
         }
 
+        setToastTone("success");
         setMessage(
           "Akun dibuat. Kalau email confirmation aktif, cek inbox dulu ya."
         );
@@ -65,12 +71,18 @@ export function AuthForm() {
       });
 
       if (error) {
-        setMessage(error.message);
+        setToastTone("error");
+        setMessage(translateAuthError(error.message));
         return;
       }
 
-      window.location.href = getNextPath();
+      const response = await fetch("/api/me");
+      const data = await response.json();
+      const role = data.profile?.role;
+      window.location.href =
+        role === "admin" || role === "worker" ? "/admin" : getNextPath();
     } catch {
+      setToastTone("error");
       setMessage(
         "Supabase belum dikonfigurasi. Isi .env.local dulu sebelum login dipakai."
       );
@@ -95,9 +107,11 @@ export function AuthForm() {
       });
 
       if (error) {
-        setMessage(error.message);
+        setToastTone("error");
+        setMessage(translateAuthError(error.message));
       }
     } catch {
+      setToastTone("error");
       setMessage(
         "Supabase belum dikonfigurasi. Isi .env.local dulu sebelum Google login dipakai."
       );
@@ -182,6 +196,11 @@ export function AuthForm() {
         >
           {isLoading ? "Memproses..." : mode === "signin" ? "Masuk" : "Daftar"}
         </button>
+        {mode === "signin" ? (
+          <Link className="text-sm font-medium text-ocean hover:text-ink" href="/auth/forgot-password">
+            Lupa password?
+          </Link>
+        ) : null}
         <button
           className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-line text-sm font-semibold text-ink disabled:cursor-not-allowed disabled:opacity-60"
           disabled={isLoading}
@@ -197,6 +216,9 @@ export function AuthForm() {
           </p>
         ) : null}
       </div>
+      {message ? (
+        <Toast message={message} onClose={() => setMessage("")} tone={toastTone} />
+      ) : null}
     </section>
   );
 }

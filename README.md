@@ -47,6 +47,8 @@ SUPABASE_SERVICE_ROLE_KEY=
 ```text
 http://localhost:3000/auth/callback
 https://domain-kamu.com/auth/callback
+http://localhost:3000/auth/update-password
+https://domain-kamu.com/auth/update-password
 ```
 
 7. Setelah akun admin pertama dibuat, jadikan admin lewat SQL Editor:
@@ -64,3 +66,17 @@ npm run supabase:test
 ```
 
 Tahap berikutnya: sambungkan auth, submit request, upload file, dashboard data asli, admin update status, offer, dan message thread.
+
+## Google OAuth Branding
+
+Di Google Cloud OAuth consent screen, set:
+
+- App name: `Nama Nanti, Digital Dulu`
+- Authorized domain: domain production kamu jika sudah tersedia
+- Authorized JavaScript origins:
+  - `http://localhost:3000`
+  - `https://domain-kamu.com`
+- Authorized redirect URI Google tetap callback Supabase:
+  - `https://PROJECT_REF.supabase.co/auth/v1/callback`
+
+Catatan: pada free setup, layar Google kadang tetap menampilkan domain Supabase karena redirect URI OAuth memang memakai callback Supabase. Nama aplikasi tetap bisa dibuat sesuai brand lewat OAuth consent screen. Untuk mengganti domain callback sepenuhnya biasanya perlu custom auth domain/custom domain Supabase.

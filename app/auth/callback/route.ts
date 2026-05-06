@@ -9,6 +9,22 @@ export async function GET(request: Request) {
   if (code) {
     const supabase = await createSupabaseServerClient();
     await supabase.auth.exchangeCodeForSession(code);
+
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
+
+    if (user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (profile?.role === "admin" || profile?.role === "worker") {
+        return NextResponse.redirect(new URL("/admin", requestUrl.origin));
+      }
+    }
   }
 
   return NextResponse.redirect(new URL(next, requestUrl.origin));

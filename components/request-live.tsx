@@ -17,6 +17,7 @@ import {
   XCircle
 } from "lucide-react";
 import { StatusBadge } from "@/components/status-badge";
+import { Toast, type ToastTone } from "@/components/toast";
 import {
   canClientCancel,
   formatCurrency,
@@ -412,6 +413,8 @@ function RequestDetailLive({ id, mode }: { id: string; mode: "client" | "admin" 
   const [request, setRequest] = useState<AnyRequest | null>(null);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [toastTone, setToastTone] = useState<ToastTone>("success");
+  const [actionLoading, setActionLoading] = useState("");
   const [activeTab, setActiveTab] = useState(mode === "admin" ? "chat" : "info");
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState("");
@@ -465,64 +468,95 @@ function RequestDetailLive({ id, mode }: { id: string; mode: "client" | "admin" 
   async function sendMessage(event: FormEvent) {
     event.preventDefault();
     if (!message.trim()) return;
-    await fetchJson(
-      `${mode === "admin" ? "/api/admin" : "/api/client"}/requests/${id}/messages`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ body: message })
-      }
-    );
-    setMessage("");
-    setNotice("Pesan terkirim.");
-    await load();
+    setActionLoading("message");
+    try {
+      await fetchJson(
+        `${mode === "admin" ? "/api/admin" : "/api/client"}/requests/${id}/messages`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ body: message })
+        }
+      );
+      setMessage("");
+      showToast("Pesan terkirim.", "success");
+      await load();
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Pesan gagal dikirim.", "error");
+    } finally {
+      setActionLoading("");
+    }
   }
 
   async function uploadFiles() {
     if (!files?.length) return;
+    setActionLoading("files");
     const data = new FormData();
     Array.from(files).forEach((file) => data.append("files", file));
     if (mode === "admin") data.set("fileKind", "deliverable");
-    await fetchJson(`${mode === "admin" ? "/api/admin" : "/api/client"}/requests/${id}/files`, {
-      method: "POST",
-      body: data
-    });
-    setFiles(null);
-    setNotice("File berhasil diupload.");
-    await load();
+    try {
+      await fetchJson(`${mode === "admin" ? "/api/admin" : "/api/client"}/requests/${id}/files`, {
+        method: "POST",
+        body: data
+      });
+      setFiles(null);
+      showToast("File berhasil diupload.", "success");
+      await load();
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Upload file gagal.", "error");
+    } finally {
+      setActionLoading("");
+    }
   }
 
   async function acceptOffer() {
     if (!activeOffer) return;
-    await fetchJson(`/api/client/offers/${activeOffer.id}/accept`, {
-      method: "POST"
-    });
-    setNotice("Offer disetujui. Menunggu instruksi pembayaran manual.");
-    await load();
+    setActionLoading("accept");
+    try {
+      await fetchJson(`/api/client/offers/${activeOffer.id}/accept`, {
+        method: "POST"
+      });
+      showToast("Offer disetujui. Menunggu instruksi pembayaran manual.", "success");
+      await load();
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Offer gagal disetujui.", "error");
+    } finally {
+      setActionLoading("");
+    }
   }
 
   async function cancelRequest() {
     const ok = window.confirm("Yakin ingin membatalkan request ini?");
     if (!ok) return;
     try {
+      setActionLoading("cancel");
       await fetchJson(`/api/client/requests/${id}/cancel`, { method: "POST" });
-      setNotice("Request berhasil dibatalkan.");
+      showToast("Request berhasil dibatalkan.", "success");
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Request tidak bisa dibatalkan.");
+      showToast(err instanceof Error ? err.message : "Request tidak bisa dibatalkan.", "error");
+    } finally {
+      setActionLoading("");
     }
   }
 
   async function updateStatus(event: FormEvent) {
     event.preventDefault();
-    await fetchJson(`/api/admin/requests/${id}/status`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status, note: statusNote })
-    });
-    setStatusNote("");
-    setNotice("Status berhasil diperbarui.");
-    await load();
+    setActionLoading("status");
+    try {
+      await fetchJson(`/api/admin/requests/${id}/status`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status, note: statusNote })
+      });
+      setStatusNote("");
+      showToast("Status berhasil diperbarui.", "success");
+      await load();
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Status gagal diperbarui.", "error");
+    } finally {
+      setActionLoading("");
+    }
   }
 
   async function createOffer(event: FormEvent) {
@@ -531,19 +565,23 @@ function RequestDetailLive({ id, mode }: { id: string; mode: "client" | "admin" 
 
     if (!offer.price || Number(offer.price) <= 0) {
       setOfferError("Harga penawaran wajib diisi dengan angka yang valid.");
+      showToast("Harga penawaran wajib diisi dengan angka yang valid.", "error");
       return;
     }
 
     if (!offer.estimatedDays || Number(offer.estimatedDays) <= 0) {
       setOfferError("Estimasi pengerjaan wajib diisi.");
+      showToast("Estimasi pengerjaan wajib diisi.", "error");
       return;
     }
 
     if (!offer.scope.trim()) {
       setOfferError("Scope pekerjaan wajib diisi agar client paham penawarannya untuk apa.");
+      showToast("Scope pekerjaan wajib diisi.", "error");
       return;
     }
 
+    setActionLoading("offer");
     try {
       await fetchJson(`/api/admin/requests/${id}/offers`, {
         method: "POST",
@@ -558,11 +596,19 @@ function RequestDetailLive({ id, mode }: { id: string; mode: "client" | "admin" 
         scope: "",
         paymentTerms: ""
       });
-      setNotice("Offer berhasil dikirim ke client.");
+      showToast("Offer berhasil dikirim ke client.", "success");
       await load();
     } catch (err) {
       setOfferError(err instanceof Error ? err.message : "Offer gagal dikirim.");
+      showToast(err instanceof Error ? err.message : "Offer gagal dikirim.", "error");
+    } finally {
+      setActionLoading("");
     }
+  }
+
+  function showToast(message: string, tone: ToastTone) {
+    setToastTone(tone);
+    setNotice(message);
   }
 
   if (error && !request) {
@@ -611,11 +657,7 @@ function RequestDetailLive({ id, mode }: { id: string; mode: "client" | "admin" 
       ))}
     </div>
     <div className="grid gap-4 lg:grid-cols-[0.64fr_0.36fr] lg:gap-5">
-      {notice ? (
-        <div className="lg:col-span-2 rounded-lg bg-mint/10 p-3 text-sm font-medium text-emerald-700">
-          {notice}
-        </div>
-      ) : null}
+      {notice ? <Toast message={notice} onClose={() => setNotice("")} tone={toastTone} /> : null}
       <section className="grid gap-5">
         <article className={`${tabPanel("info")} rounded-lg border border-line bg-white p-4 shadow-soft sm:p-5`}>
           <div className="flex flex-wrap items-center gap-2">
@@ -642,17 +684,26 @@ function RequestDetailLive({ id, mode }: { id: string; mode: "client" | "admin" 
             {messages.length === 0 ? (
               <p className="text-sm text-muted">Belum ada pesan.</p>
             ) : null}
-            {messages.map((item) => (
-              <div className="rounded-lg bg-paper p-3 text-sm leading-6 text-muted" key={item.id}>
+            {messages.map((item) => {
+              const isStaffMessage = item.sender?.role === "admin" || item.sender?.role === "worker";
+              return (
+              <div
+                className={`max-w-[88%] rounded-lg p-3 text-sm leading-6 ${
+                  isStaffMessage
+                    ? "ml-auto bg-ink text-white"
+                    : "mr-auto bg-paper text-muted"
+                }`}
+                key={item.id}
+              >
                 <div className="mb-1 flex flex-wrap items-center gap-2 text-xs">
-                  <span className="font-semibold text-ink">
+                  <span className={isStaffMessage ? "font-semibold text-white" : "font-semibold text-ink"}>
                     {item.sender?.full_name ?? item.sender?.email ?? "User"}
                   </span>
                   <span>{formatDateTime(item.created_at)}</span>
                 </div>
                 {item.body}
               </div>
-            ))}
+            )})}
           </div>
           <form className="mt-4 flex gap-2" onSubmit={sendMessage}>
             <input
@@ -663,7 +714,7 @@ function RequestDetailLive({ id, mode }: { id: string; mode: "client" | "admin" 
               value={message}
             />
             <button className="focus-ring grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-ink text-white" type="submit">
-              <Send size={18} />
+              {actionLoading === "message" ? "..." : <Send size={18} />}
             </button>
           </form>
         </article>
@@ -685,8 +736,8 @@ function RequestDetailLive({ id, mode }: { id: string; mode: "client" | "admin" 
               <p className="mt-2 text-sm text-muted">Status offer: {activeOffer.status}</p>
               {mode === "client" && activeOffer.status === "sent" ? (
                 <div className="mt-5 grid gap-2">
-                  <button className="focus-ring h-11 rounded-lg bg-ink text-sm font-semibold text-white" onClick={acceptOffer} type="button">
-                    Setuju dan lanjut pembayaran
+                  <button className="focus-ring h-11 rounded-lg bg-ink text-sm font-semibold text-white disabled:opacity-60" disabled={actionLoading === "accept"} onClick={acceptOffer} type="button">
+                    {actionLoading === "accept" ? "Memproses..." : "Setuju dan lanjut pembayaran"}
                   </button>
                   <p className="text-xs leading-5 text-muted">
                     Kalau masih ingin nego, balas lewat thread.
@@ -711,7 +762,7 @@ function RequestDetailLive({ id, mode }: { id: string; mode: "client" | "admin" 
               <textarea className="focus-ring mt-3 min-h-20 w-full rounded-lg border border-line p-3 text-sm" onChange={(event) => setStatusNote(event.target.value)} placeholder="Catatan status" value={statusNote} />
               <button className="focus-ring mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-ink text-sm font-semibold text-white" type="submit">
                 <Save size={17} />
-                Simpan Status
+                {actionLoading === "status" ? "Menyimpan..." : "Simpan Status"}
               </button>
             </form>
 
@@ -755,7 +806,7 @@ function RequestDetailLive({ id, mode }: { id: string; mode: "client" | "admin" 
                   </p>
                 ) : null}
                 <button className="focus-ring h-11 rounded-lg bg-mint text-sm font-semibold text-white" type="submit">
-                  Kirim Offer
+                  {actionLoading === "offer" ? "Mengirim..." : "Kirim Offer"}
                 </button>
               </div>
             </form>
@@ -764,9 +815,9 @@ function RequestDetailLive({ id, mode }: { id: string; mode: "client" | "admin" 
           <article className={`${tabPanel("offer")} rounded-lg border border-line bg-white p-4 sm:p-5`}>
             <h2 className="text-lg font-semibold text-ink">Pembatalan</h2>
             {clientCanCancel ? (
-              <button className="focus-ring mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-rose-200 text-sm font-semibold text-rose-700" onClick={cancelRequest} type="button">
+              <button className="focus-ring mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-rose-200 text-sm font-semibold text-rose-700 disabled:opacity-60" disabled={actionLoading === "cancel"} onClick={cancelRequest} type="button">
                 <XCircle size={17} />
-                Batalkan request
+                {actionLoading === "cancel" ? "Membatalkan..." : "Batalkan request"}
               </button>
             ) : (
               <p className="mt-3 text-sm leading-6 text-muted">
@@ -794,7 +845,7 @@ function RequestDetailLive({ id, mode }: { id: string; mode: "client" | "admin" 
             <input className="text-sm" multiple onChange={(event) => setFiles(event.target.files)} type="file" />
             <button className="focus-ring inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-line text-sm font-semibold text-ink" onClick={uploadFiles} type="button">
               <UploadCloud size={16} />
-              Upload file
+              {actionLoading === "files" ? "Mengupload..." : "Upload file"}
             </button>
           </div>
         </article>

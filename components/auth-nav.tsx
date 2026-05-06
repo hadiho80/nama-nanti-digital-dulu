@@ -88,11 +88,11 @@ export function AuthNav() {
         <div className="fixed inset-0 z-50 md:hidden">
           <button
             aria-label="Tutup menu"
-            className="absolute inset-0 bg-ink/30"
+            className="absolute inset-0 bg-ink/35 backdrop-blur-sm"
             onClick={close}
             type="button"
           />
-          <aside className="absolute right-0 top-0 h-full w-[84vw] max-w-sm border-l border-line bg-paper p-4 shadow-soft">
+          <aside className="absolute right-0 top-0 h-full w-[84vw] max-w-sm rounded-l-2xl border-l border-line bg-paper/98 p-4 shadow-soft">
             <div className="flex items-center justify-between">
               <div className="leading-tight">
                 <p className="text-sm font-semibold text-ink">Nama Nanti</p>
