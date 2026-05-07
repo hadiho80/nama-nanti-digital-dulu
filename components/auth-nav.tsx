@@ -78,37 +78,17 @@ export function AuthNav() {
       <button
         aria-label="Buka menu"
         className="focus-ring grid h-10 w-10 place-items-center rounded-lg border border-line bg-white text-ink md:hidden"
-        onClick={() => setIsOpen(true)}
+        onClick={() => setIsOpen((current) => !current)}
         type="button"
       >
-        <Menu size={20} />
+        {isOpen ? <X size={20} /> : <Menu size={20} />}
       </button>
 
       {isOpen ? (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <button
-            aria-label="Tutup menu"
-            className="absolute inset-0 bg-ink/35 backdrop-blur-sm"
-            onClick={close}
-            type="button"
-          />
-          <aside className="absolute right-0 top-0 h-full w-[84vw] max-w-sm rounded-l-2xl border-l border-line bg-paper/98 p-4 shadow-soft">
-            <div className="flex items-center justify-between">
-              <div className="leading-tight">
-                <p className="text-sm font-semibold text-ink">Nama Nanti</p>
-                <p className="text-xs text-muted">Digital Dulu</p>
-              </div>
-              <button
-                className="focus-ring grid h-10 w-10 place-items-center rounded-lg border border-line bg-white"
-                onClick={close}
-                type="button"
-              >
-                <X size={19} />
-              </button>
-            </div>
-
+        <div className="absolute left-0 right-0 top-16 z-40 border-b border-line bg-paper shadow-soft md:hidden">
+          <div className="mx-auto w-full max-w-6xl px-4 py-4">
             {profile ? (
-              <div className="mt-5 rounded-lg border border-line bg-white p-3">
+              <div className="mb-3 rounded-lg bg-white p-3">
                 <p className="truncate text-sm font-semibold text-ink">
                   Halo, {displayName}
                 </p>
@@ -118,10 +98,14 @@ export function AuthNav() {
               </div>
             ) : null}
 
-            <nav className="mt-5 grid gap-2">
+            <nav className="grid gap-1">
               {navItems.map((item) => (
                 <Link
-                  className={item.primary ? "focus-ring flex h-11 items-center rounded-lg bg-ink px-3 text-sm font-semibold text-white" : "focus-ring flex h-11 items-center rounded-lg border border-line bg-white px-3 text-sm font-semibold text-ink"}
+                  className={
+                    item.primary
+                      ? "focus-ring mt-2 flex h-11 items-center justify-center rounded-lg bg-ink px-3 text-sm font-semibold text-white"
+                      : "focus-ring flex min-h-11 items-center border-b border-line/70 py-3 text-sm font-semibold text-ink last:border-b-0"
+                  }
                   href={item.href}
                   key={item.href + item.label}
                   onClick={close}
@@ -140,7 +124,7 @@ export function AuthNav() {
                 </button>
               ) : null}
             </nav>
-          </aside>
+          </div>
         </div>
       ) : null}
     </>
@@ -160,7 +144,11 @@ function getNavItems(profile: Profile | null) {
   const isStaff = profile.role === "admin" || profile.role === "worker";
 
   if (isStaff) {
-    return [{ href: "/admin", label: "Kelola Request" }];
+    const items = [{ href: "/admin", label: "Kelola Request" }];
+    if (profile.role === "admin") {
+      items.push({ href: "/admin/settings", label: "Settings" });
+    }
+    return items;
   }
 
   return [

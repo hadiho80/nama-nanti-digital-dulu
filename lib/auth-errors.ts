@@ -5,6 +5,10 @@ export function translateAuthError(message?: string | null) {
     return "Email atau password salah. Kalau belum punya akun, silakan daftar dulu.";
   }
 
+  if (lower.includes("auth session missing") || lower.includes("session")) {
+    return "Sesi reset password tidak ditemukan. Buka link reset dari email di browser yang sama, atau copy link reset ke browser ini.";
+  }
+
   if (lower.includes("user already registered") || lower.includes("already registered")) {
     return "Email ini sudah terdaftar. Silakan login.";
   }

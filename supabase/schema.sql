@@ -143,6 +143,13 @@ create table public.payments (
   updated_at timestamptz not null default now()
 );
 
+create table public.site_settings (
+  key text primary key,
+  value jsonb not null default '{}'::jsonb,
+  updated_by uuid references public.profiles(id) on delete set null,
+  updated_at timestamptz not null default now()
+);
+
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
@@ -188,6 +195,7 @@ alter table public.messages enable row level security;
 alter table public.status_history enable row level security;
 alter table public.payments enable row level security;
 alter table public.service_categories enable row level security;
+alter table public.site_settings enable row level security;
 
 create or replace function public.is_staff(user_id uuid)
 returns boolean
@@ -339,6 +347,29 @@ for all
 using (public.is_staff(auth.uid()))
 with check (public.is_staff(auth.uid()));
 
+create policy "settings readable by everyone"
+on public.site_settings
+for select
+using (true);
+
+create policy "settings manageable by admin"
+on public.site_settings
+for all
+using (
+  exists (
+    select 1 from public.profiles
+    where id = auth.uid()
+      and role = 'admin'
+  )
+)
+with check (
+  exists (
+    select 1 from public.profiles
+    where id = auth.uid()
+      and role = 'admin'
+  )
+);
+
 create policy "request file objects readable by owner folder and staff"
 on storage.objects
 for select
@@ -380,3 +411,10 @@ with check (
   bucket_id = 'deliverables'
   and public.is_staff(auth.uid())
 );
+
+insert into public.site_settings (key, value)
+values
+  ('contact', '{}'::jsonb),
+  ('password_policy', '{"enabled": true, "minLength": 8, "requireLetter": false, "requireNumber": false, "requireSymbol": false}'::jsonb),
+  ('content', '{}'::jsonb)
+on conflict (key) do nothing;

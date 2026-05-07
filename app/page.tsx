@@ -8,6 +8,7 @@ import {
   UploadCloud
 } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
+import { PublicContact } from "@/components/public-contact";
 import { portfolioSamples, services } from "@/lib/data";
 
 export default function HomePage() {
@@ -267,7 +268,13 @@ export default function HomePage() {
             <Link className="hover:text-ink" href="/request">
               Kirim Request
             </Link>
-            <span>Instagram: segera</span>
+            <Link className="hover:text-ink" href="/privacy">
+              Privacy
+            </Link>
+            <Link className="hover:text-ink" href="/terms">
+              Terms
+            </Link>
+            <PublicContact compact />
           </div>
         </div>
       </footer>

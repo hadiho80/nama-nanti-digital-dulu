@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { Mail } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Eye, EyeOff, Mail } from "lucide-react";
 import { Toast, type ToastTone } from "@/components/toast";
 import { translateAuthError } from "@/lib/auth-errors";
+import { defaultPasswordPolicy, passwordPolicyDescription, type PasswordPolicy, validatePasswordPolicy } from "@/lib/settings";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type AuthMode = "signin" | "signup";
@@ -18,6 +19,22 @@ export function AuthForm() {
   const [message, setMessage] = useState("");
   const [toastTone, setToastTone] = useState<ToastTone>("info");
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordPolicy, setPasswordPolicy] = useState<PasswordPolicy>(defaultPasswordPolicy);
+
+  useEffect(() => {
+    async function loadSettings() {
+      try {
+        const response = await fetch("/api/site-settings");
+        const data = await response.json();
+        setPasswordPolicy({ ...defaultPasswordPolicy, ...(data.passwordPolicy ?? {}) });
+      } catch {
+        setPasswordPolicy(defaultPasswordPolicy);
+      }
+    }
+
+    void loadSettings();
+  }, []);
 
   function getNextPath() {
     const params = new URLSearchParams(window.location.search);
@@ -38,6 +55,13 @@ export function AuthForm() {
       const supabase = createSupabaseBrowserClient();
 
       if (mode === "signup") {
+        const validation = validatePasswordPolicy(password, passwordPolicy);
+        if (validation) {
+          setToastTone("error");
+          setMessage(validation);
+          return;
+        }
+
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -180,13 +204,28 @@ export function AuthForm() {
         </label>
         <label className="grid gap-2 text-sm font-medium text-ink">
           Password
-          <input
-            className="focus-ring h-11 rounded-lg border border-line px-3 text-sm"
-            onChange={(event) => setPassword(event.target.value)}
-            placeholder="Minimal 8 karakter"
-            type="password"
-            value={password}
-          />
+          <span className="relative">
+            <input
+              className="focus-ring h-11 w-full rounded-lg border border-line px-3 pr-11 text-sm"
+              onChange={(event) => setPassword(event.target.value)}
+              placeholder="Minimal 8 karakter"
+              type={showPassword ? "text" : "password"}
+              value={password}
+            />
+            <button
+              aria-label={showPassword ? "Sembunyikan password" : "Lihat password"}
+              className="absolute right-2 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-md text-muted hover:text-ink"
+              onClick={() => setShowPassword((current) => !current)}
+              type="button"
+            >
+              {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+            </button>
+          </span>
+          {mode === "signup" ? (
+            <span className="text-xs leading-5 text-muted">
+              {passwordPolicyDescription(passwordPolicy)}
+            </span>
+          ) : null}
         </label>
         <button
           className="focus-ring inline-flex h-11 items-center justify-center rounded-lg bg-ink text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
